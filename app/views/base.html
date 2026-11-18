@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FreshSip - Fruit Juice Market{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/"><span class="brand-icon">🍊</span><span>FreshSip<small>Natural Goodness</small></span></a>
+  <nav><a href="/">Home</a><a href="/shop">Shop</a><a href="/about">About us</a><a href="/contact">Contact</a></nav>
+  <div class="nav-actions">
+    <form action="/shop" method="get" class="search"><input name="q" placeholder="Search juices..."><button>⌕</button></form>
+    <a class="cart-link" href="/cart">🛒 Cart</a>
+    {% if request.session.get('user_id') %}
+      <a href="/orders">Orders</a><a href="/wishlist">Wishlist</a>
+      <form action="/logout" method="post"><button class="link-button">Logout</button></form>
+    {% else %}<a href="/login">Login</a>{% endif %}
+  </div>
+</header>
+<main>{% block content %}{% endblock %}</main>
+<footer><div><strong>FreshSip</strong><p>Freshly squeezed happiness in every sip.</p></div><div><a href="/shop">Shop juices</a><a href="/support">Customer support</a><a href="/admin">Admin</a></div><p>© 2026 FreshSip Fruit Juice Market</p></footer>
+<script src="/static/js/app.js"></script>
+</body></html>

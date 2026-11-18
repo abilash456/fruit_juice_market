@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy"><span class="eyebrow">FRESH • NATURAL • DELICIOUS</span>
+    <h1>A little sunshine<br>in <em>every sip.</em></h1>
+    <p>Freshly squeezed natural fruit juices for a healthier and happier you.</p>
+    <a class="btn" href="/shop">Shop now →</a><div class="rating">★★★★★ <span>4.8/5 from happy customers</span></div>
+  </div><div class="hero-art"><div class="sun"></div><div class="hero-fruit">🍊 🥭</div><div class="juice-glass">🥤</div><div class="leaf">🌿</div></div>
+</section>
+<section class="benefits"><div>🌿 <b>100% Natural</b></div><div>🥤 <b>Freshly Squeezed</b></div><div>🚚 <b>Fast Delivery</b></div><div>💚 <b>Goodness Inside</b></div></section>
+<section class="section"><div class="section-heading"><span></span><h2>Our <em>best sellers</em></h2><span></span></div>
+<div class="product-grid">{% for p in products[:4] %}<article class="product-card"><a class="product-art" href="/product/{{p.id}}"><span class="discount">FRESH</span><span class="big-emoji">{{p.emoji}}</span></a><div class="product-info"><h3>{{p.name}}</h3><div class="stars">★★★★★ <small>4.8 customer rating</small></div><div class="buy-row"><strong>₹{{"%.0f"|format(p.price)}}</strong><form action="/cart/add/{{p.id}}" method="post"><input type="hidden" name="quantity" value="1"><button class="btn small">🛒 Add to Cart</button></form></div></div></article>{% endfor %}</div>
+<a class="text-link" href="/shop">View all juices →</a></section>
+{% endblock %}
