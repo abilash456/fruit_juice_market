@@ -1,1 +1,79 @@
-{% extends "base.html" %}{% block content %}<section class="section support-layout"><div class="form-card"><h1>Customer support</h1><p>Tell us how we can help.</p><form method="post"><label>Subject</label><input name="subject" required><label>Category</label><select name="category"><option>Order Issues</option><option>Payment Issues</option><option>Delivery Issues</option><option>Product Issues</option><option>Refund Requests</option><option>General Questions</option></select><label>Message</label><textarea name="message" required rows="4"></textarea><button class="btn full">Submit ticket</button></form></div><div><h2>Your support tickets</h2>{% for t in tickets %}<article class="order-card"><div><b>{{t.subject}}</b><small>{{t.category}}</small></div><span class="status">{{t.status}}</span></article>{% else %}<p>No tickets yet.</p>{% endfor %}</div></section>{% endblock %}
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="section support-layout">
+
+    <div class="form-card">
+        <h1>Customer Support</h1>
+
+        <p>How can we help you?</p>
+
+        <form method="post" action="/support">
+
+            <label>Subject</label>
+            <input
+                type="text"
+                name="subject"
+                placeholder="Enter your subject"
+                required
+            >
+
+            <label>Category</label>
+
+            <select name="category">
+                <option>Order Issues</option>
+                <option>Payment Issues</option>
+                <option>Delivery Issues</option>
+                <option>Product Issues</option>
+                <option>Refund Requests</option>
+                <option>General Questions</option>
+            </select>
+
+            <label>Message</label>
+
+            <textarea
+                name="message"
+                rows="5"
+                placeholder="Describe your problem..."
+                required
+            ></textarea>
+
+            <button class="btn full" type="submit">
+                Submit Ticket
+            </button>
+
+        </form>
+    </div>
+
+    <div>
+        <h2>My Support Tickets</h2>
+
+        {% for ticket in tickets %}
+
+        <div class="order-card">
+
+            <div>
+                <b>{{ ticket.subject }}</b>
+                <small>{{ ticket.category }}</small>
+                <small>{{ ticket.created_at }}</small>
+            </div>
+
+            <span class="status">
+                {{ ticket.status }}
+            </span>
+
+        </div>
+
+        {% else %}
+
+        <p>No support tickets found.</p>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}
