@@ -49,9 +49,18 @@ def add_review(
     ).first()
 
     if existing_review:
-        raise HTTPException(
-            status_code=400,
-            detail="You have already reviewed this product."
+        existing_review.rating = rating
+        existing_review.comment = comment
+
+        # Require admin approval again after editing
+        existing_review.is_approved = False
+
+        session.add(existing_review)
+        session.commit()
+
+        return RedirectResponse(
+            f"/product/{product_id}?review=updated",
+            status_code=303
         )
 
     # Save review
@@ -68,6 +77,6 @@ def add_review(
     session.commit()
 
     return RedirectResponse(
-        f"/shop/product/{product_id}?review=success",
+        f"/product/{product_id}?review=success",
         status_code=303
     )

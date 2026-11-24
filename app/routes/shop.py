@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from app.database.database import get_session
 from app.models.models import (Product, Category, Order, OrderItem, WishlistItem, Review, User)
-from app.utils.dependencies import require_user
+from app.utils.dependencies import require_user, current_user
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/views")
@@ -22,11 +22,13 @@ def shop(request: Request, q: str = "", category: int = 0, session: Session = De
     return templates.TemplateResponse(request, "customer/shop.html",
                                       {"products": products, "categories": categories, "q": q, "category": category})
 
+
 @router.get("/product/{product_id}", response_class=HTMLResponse)
 def product_detail(
     request: Request,
     product_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    user=Depends(current_user)
 ):
     product = session.get(Product, product_id)
 
@@ -46,9 +48,9 @@ def product_detail(
     reviews = [
         {
             "review": review,
-            "user_name": user.name
+            "user_name": customer.name
         }
-        for review, user in review_rows
+        for review, customer in review_rows
     ]
 
     total_reviews = len(reviews)
@@ -63,9 +65,14 @@ def product_detail(
         "customer/product.html",
         {
             "product": product,
-            "reviews": reviews
+            "reviews": reviews,
+            "total_reviews": total_reviews,
+            "average_rating": round(average_rating, 1),
+            "user": user,
+            "review_status": request.query_params.get("review"),
         }
     )
+
 
 def get_cart(request: Request):
     return request.session.setdefault("cart", {})

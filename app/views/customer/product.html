@@ -14,6 +14,20 @@
 
         <h1>{{ product.name }}</h1>
 
+        <div class="product-rating">
+    {% if total_reviews > 0 %}
+
+        <span>⭐ {{ average_rating }}/5</span>
+
+        <span>({{ total_reviews }} reviews)</span>
+
+    {% else %}
+
+        <span>Be the first to review this product!</span>
+
+    {% endif %}
+</div>
+
         <p>{{ product.description }}</p>
 
         <h2>₹{{ "%.2f"|format(product.price) }}</h2>
@@ -37,6 +51,23 @@
 
 
 <!-- CUSTOMER REVIEWS -->
+
+{% if review_status == "success" %}
+
+    <div class="review-alert success">
+        ✓ Your review has been submitted successfully!
+        It will appear after admin approval.
+    </div>
+
+{% elif review_status == "updated" %}
+
+    <div class="review-alert success">
+        ✓ Your review has been updated successfully!
+        It needs admin approval again.
+    </div>
+
+{% endif %}
+
 
 <section class="reviews-section">
 
@@ -75,7 +106,9 @@
 
     <!-- ADD REVIEW FORM -->
 
-    <div class="review-form">
+<div class="review-form">
+
+    {% if user %}
 
         <h2>Write Your Review</h2>
 
@@ -110,7 +143,17 @@
 
         <p><small>Your review will appear after admin approval.</small></p>
 
-    </div>
+    {% else %}
+
+        <h2>Want to write a review?</h2>
+
+        <p>Please log in to your customer account first.</p>
+
+        <a href="/login" class="btn">Login to Review</a>
+
+    {% endif %}
+
+</div>
 
 </section>
 

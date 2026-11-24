@@ -1,2 +1,109 @@
-{% extends "base.html" %}{% block content %}<section class="section"><span class="eyebrow">ADMINISTRATION</span><h1>Dashboard</h1><div class="stats"><div><small>Products</small><b>{{products|length}}</b></div><div><small>Customers</small><b>{{customers|length}}</b></div><div><small>Orders</small><b>{{orders|length}}</b></div><div><small>Revenue</small><b>₹{{"%.2f"|format(revenue)}}</b></div></div><p><a class="btn" href="/admin/products">Manage products</a></p><h2>Recent orders</h2>{% for o in orders %}<div class="order-card"><div><b>{{o.order_number}}</b><small>{{o.customer_name}} · ₹{{o.total}}</small></div><form action="/admin/orders/{{o.id}}/status" method="post"><select name="status">{% for s in ['Pending','Confirmed','Processing','Shipped','Out for Delivery','Delivered','Cancelled'] %}<option {% if o.status == s %}selected{% endif %}>{{s}}</option>{% endfor %}</select><button class="btn small">Update</button></form></div>{% else %}<p>No orders yet.</p>{% endfor %}</section>{% endblock %}
-<a href="/admin/reviews">Customer Reviews ⭐</a>
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="section">
+
+    <span class="eyebrow">ADMINISTRATION</span>
+
+    <h1>Dashboard</h1>
+
+    <!-- DASHBOARD STATISTICS -->
+
+    <div class="stats">
+
+        <div>
+            <small>Products</small>
+            <b>{{ products|length }}</b>
+        </div>
+
+        <div>
+            <small>Customers</small>
+            <b>{{ customers|length }}</b>
+        </div>
+
+        <div>
+            <small>Orders</small>
+            <b>{{ orders|length }}</b>
+        </div>
+
+        <div>
+            <small>Revenue</small>
+            <b>₹{{ "%.2f"|format(revenue) }}</b>
+        </div>
+
+    </div>
+
+    <!-- ADMIN NAVIGATION -->
+
+    <div class="admin-navigation">
+
+        <h2>Management</h2>
+
+        <div class="admin-links">
+
+            <a class="btn" href="/admin/products">
+                Manage Products
+            </a>
+
+            <a class="btn" href="/admin/reviews">
+                ⭐ Customer Reviews
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- RECENT ORDERS -->
+
+    <h2>Recent Orders</h2>
+
+    {% for o in orders %}
+
+        <div class="order-card">
+
+            <div>
+                <b>{{ o.order_number }}</b>
+                <small>{{ o.customer_name }} · ₹{{ o.total }}</small>
+            </div>
+
+            <form
+                action="/admin/orders/{{ o.id }}/status"
+                method="post">
+
+                <select name="status">
+
+                    {% for s in [
+                        'Pending',
+                        'Confirmed',
+                        'Processing',
+                        'Shipped',
+                        'Out for Delivery',
+                        'Delivered',
+                        'Cancelled'
+                    ] %}
+
+                        <option {% if o.status == s %}selected{% endif %}>
+                            {{ s }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <button class="btn small">Update</button>
+
+            </form>
+
+        </div>
+
+    {% else %}
+
+        <p>No orders yet.</p>
+
+    {% endfor %}
+
+</section>
+
+{% endblock %}
