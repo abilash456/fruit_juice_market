@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from app.database.database import get_session
-from app.models.models import Product, Category, Order, OrderItem, WishlistItem
+from app.models.models import (Product, Category, Order, OrderItem, WishlistItem, Review, User)
 from app.utils.dependencies import require_user
 
 router = APIRouter()
@@ -23,11 +23,49 @@ def shop(request: Request, q: str = "", category: int = 0, session: Session = De
                                       {"products": products, "categories": categories, "q": q, "category": category})
 
 @router.get("/product/{product_id}", response_class=HTMLResponse)
-def product_detail(request: Request, product_id: int, session: Session = Depends(get_session)):
+def product_detail(
+    request: Request,
+    product_id: int,
+    session: Session = Depends(get_session)
+):
     product = session.get(Product, product_id)
+
     if not product or not product.is_active:
         raise HTTPException(404, "Product not found")
-    return templates.TemplateResponse(request, "customer/product.html", {"product": product})
+
+    review_rows = session.exec(
+        select(Review, User)
+        .join(User, Review.user_id == User.id)
+        .where(
+            Review.product_id == product_id,
+            Review.is_approved == True
+        )
+        .order_by(Review.created_at.desc())
+    ).all()
+
+    reviews = [
+        {
+            "review": review,
+            "user_name": user.name
+        }
+        for review, user in review_rows
+    ]
+
+    total_reviews = len(reviews)
+
+    average_rating = (
+        sum(item["review"].rating for item in reviews) / total_reviews
+        if total_reviews > 0 else 0
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "customer/product.html",
+        {
+            "product": product,
+            "reviews": reviews
+        }
+    )
 
 def get_cart(request: Request):
     return request.session.setdefault("cart", {})

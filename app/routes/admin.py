@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from app.database.database import get_session
-from app.models.models import User, Product, Category, Order
+from app.models.models import User, Product, Category, Order, Review
 from app.utils.dependencies import require_admin
 
 router = APIRouter()
@@ -52,3 +52,70 @@ def update_order(order_id: int, status: str=Form(...), admin=Depends(require_adm
         order.status = status
         session.add(order); session.commit()
     return RedirectResponse("/admin", status_code=303)
+
+# ADMIN REVIEW MANAGEMENT
+
+@router.get("/admin/reviews", response_class=HTMLResponse)
+def admin_reviews(
+    request: Request,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    review_rows = session.exec(
+        select(Review, User, Product)
+        .join(User, Review.user_id == User.id)
+        .join(Product, Review.product_id == Product.id)
+        .order_by(Review.created_at.desc())
+    ).all()
+
+    reviews = [
+        {
+            "review": review,
+            "customer": customer,
+            "product": product
+        }
+        for review, customer, product in review_rows
+    ]
+
+    return templates.TemplateResponse(
+        request,
+        "admin/reviews.html",
+        {
+            "reviews": reviews
+        }
+    )
+
+
+# APPROVE REVIEW
+
+@router.post("/admin/reviews/approve/{review_id}")
+def approve_review(
+    review_id: int,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    review = session.get(Review, review_id)
+
+    if review:
+        review.is_approved = True
+        session.add(review)
+        session.commit()
+
+    return RedirectResponse("/admin/reviews", status_code=303)
+
+
+# DELETE REVIEW
+
+@router.post("/admin/reviews/delete/{review_id}")
+def delete_review(
+    review_id: int,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    review = session.get(Review, review_id)
+
+    if review:
+        session.delete(review)
+        session.commit()
+
+    return RedirectResponse("/admin/reviews", status_code=303)

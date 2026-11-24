@@ -69,3 +69,18 @@ class SupportTicket(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+class Review(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    user_id: int = Field(foreign_key="user.id")
+    product_id: int = Field(foreign_key="product.id")
+
+    rating: int = Field(ge=1, le=5)
+    comment: str
+
+    is_approved: bool = False
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )

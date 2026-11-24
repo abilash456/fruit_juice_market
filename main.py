@@ -8,7 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from config import SECRET_KEY
 from app.database.database import create_db_and_seed
 from app.routes import pages, auth, shop, admin, support
-
+from app.routes.reviews import router as reviews_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +38,7 @@ app.include_router(auth.router)
 app.include_router(shop.router)
 app.include_router(admin.router)
 app.include_router(support.router)
+app.include_router(reviews_router)
 
 
 @app.get("/health")

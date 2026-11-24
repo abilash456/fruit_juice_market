@@ -1,1 +1,117 @@
-{% extends "base.html" %}{% block content %}<section class="product-detail"><div class="detail-art">{{product.emoji}}</div><div><span class="eyebrow">FRESH FROM OUR JUICE BAR</span><h1>{{product.name}}</h1><p>{{product.description}}</p><h2>₹{{"%.2f"|format(product.price)}}</h2><p>{{product.stock}} in stock</p><form action="/cart/add/{{product.id}}" method="post" class="inline-form"><input type="number" name="quantity" value="1" min="1" max="{{product.stock}}"><button class="btn">Add to cart</button></form></div></section>{% endblock %}
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="product-detail">
+
+    <div class="detail-art">
+        {{ product.emoji }}
+    </div>
+
+    <div>
+        <span class="eyebrow">FRESH FROM OUR JUICE BAR</span>
+
+        <h1>{{ product.name }}</h1>
+
+        <p>{{ product.description }}</p>
+
+        <h2>₹{{ "%.2f"|format(product.price) }}</h2>
+
+        <p>{{ product.stock }} in stock</p>
+
+        <form action="/cart/add/{{ product.id }}" method="post" class="inline-form">
+            <input
+                type="number"
+                name="quantity"
+                value="1"
+                min="1"
+                max="{{ product.stock }}"
+            >
+
+            <button class="btn">Add to cart</button>
+        </form>
+    </div>
+
+</section>
+
+
+<!-- CUSTOMER REVIEWS -->
+
+<section class="reviews-section">
+
+    <h2>Customer Reviews ⭐</h2>
+
+    {% if reviews %}
+
+        {% for item in reviews %}
+
+            <div class="review-card">
+
+                <h3>{{ item.user_name }}</h3>
+
+                <p class="review-stars">
+                    {% for star in range(item.review.rating) %}
+                        ⭐
+                    {% endfor %}
+                </p>
+
+                <p>{{ item.review.comment }}</p>
+
+                <small>
+                    {{ item.review.created_at.strftime("%d %b %Y") }}
+                </small>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No reviews yet. Be the first to review this juice!</p>
+
+    {% endif %}
+
+
+    <!-- ADD REVIEW FORM -->
+
+    <div class="review-form">
+
+        <h2>Write Your Review</h2>
+
+        <form action="/reviews/{{ product.id }}" method="post">
+
+            <label for="rating">Your Rating</label>
+
+            <select name="rating" id="rating" required>
+                <option value="">Select rating</option>
+                <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                <option value="4">⭐⭐⭐⭐ - Very Good</option>
+                <option value="3">⭐⭐⭐ - Good</option>
+                <option value="2">⭐⭐ - Fair</option>
+                <option value="1">⭐ - Poor</option>
+            </select>
+
+            <label for="comment">Your Review</label>
+
+            <textarea
+                name="comment"
+                id="comment"
+                rows="4"
+                placeholder="Tell us about your juice experience..."
+                required
+            ></textarea>
+
+            <button type="submit" class="btn">
+                Submit Review
+            </button>
+
+        </form>
+
+        <p><small>Your review will appear after admin approval.</small></p>
+
+    </div>
+
+</section>
+
+{% endblock %}
