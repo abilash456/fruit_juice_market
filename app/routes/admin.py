@@ -3,20 +3,48 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from app.database.database import get_session
-from app.models.models import User, Product, Category, Order, Review
+from app.models.models import User, Product, Category, Order, Review, Coupon
 from app.utils.dependencies import require_admin
+from datetime import datetime, timezone
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/views")
 
 @router.get("/admin", response_class=HTMLResponse)
-def dashboard(request: Request, admin=Depends(require_admin), session: Session=Depends(get_session)):
+def dashboard(
+    request: Request,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
     products = session.exec(select(Product)).all()
-    orders = session.exec(select(Order).order_by(Order.created_at.desc())).all()
-    customers = session.exec(select(User).where(User.role == "customer")).all()
-    return templates.TemplateResponse(request, "admin/dashboard.html",
-        {"products": products, "orders": orders, "customers": customers,
-         "revenue": sum(o.total for o in orders if o.status != "Cancelled")})
+
+    orders = session.exec(
+        select(Order).order_by(Order.created_at.desc())
+    ).all()
+
+    customers = session.exec(
+        select(User).where(User.role == "customer")
+    ).all()
+
+    # Count pending customer reviews
+    pending_reviews = session.exec(
+        select(Review).where(Review.is_approved == False)
+    ).all()
+
+    return templates.TemplateResponse(
+        request,
+        "admin/dashboard.html",
+        {
+            "products": products,
+            "orders": orders,
+            "customers": customers,
+            "revenue": sum(
+                o.total for o in orders
+                if o.status != "Cancelled"
+            ),
+            "pending_reviews": len(pending_reviews)
+        }
+    )
 
 @router.get("/admin/products", response_class=HTMLResponse)
 def admin_products(request: Request, admin=Depends(require_admin), session: Session=Depends(get_session)):
@@ -119,3 +147,90 @@ def delete_review(
         session.commit()
 
     return RedirectResponse("/admin/reviews", status_code=303)
+
+# ADMIN COUPON MANAGEMENT
+
+@router.get("/admin/coupons", response_class=HTMLResponse)
+def admin_coupons(
+    request: Request,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    coupons = session.exec(
+        select(Coupon).order_by(Coupon.created_at.desc())
+    ).all()
+
+    return templates.TemplateResponse(
+        request,
+        "admin/coupons.html",
+        {
+            "coupons": coupons
+        }
+    )
+
+# CREATE NEW COUPON
+
+@router.post("/admin/coupons/create")
+def create_coupon(
+    code: str = Form(...),
+    discount_type: str = Form(...),
+    discount_value: float = Form(...),
+    minimum_order: float = Form(0),
+    max_discount: float = Form(0),
+    usage_limit: int = Form(0),
+    expires_at: str = Form(""),
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    code = code.strip().upper()
+
+    # Validate coupon details
+    if not code or discount_type not in {"percentage", "fixed"}:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    if discount_value <= 0:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    if discount_type == "percentage" and discount_value > 100:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    if minimum_order < 0 or max_discount < 0:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    if usage_limit < 0:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    # Check duplicate coupon code
+    existing = session.exec(
+        select(Coupon).where(Coupon.code == code)
+    ).first()
+
+    if existing:
+        return RedirectResponse("/admin/coupons", status_code=303)
+
+    # Convert expiry date
+    expiry = None
+    if expires_at:
+        try:
+            expiry = datetime.strptime(
+                expires_at, "%Y-%m-%d"
+            ).replace(tzinfo=timezone.utc)
+        except ValueError:
+            return RedirectResponse("/admin/coupons", status_code=303)
+
+    coupon = Coupon(
+        code=code,
+        discount_type=discount_type,
+        discount_value=discount_value,
+        minimum_order=minimum_order,
+        max_discount=max_discount if max_discount > 0 else None,
+        usage_limit=usage_limit if usage_limit > 0 else None,
+        used_count=0,
+        is_active=True,
+        expires_at=expiry
+    )
+
+    session.add(coupon)
+    session.commit()
+
+    return RedirectResponse("/admin/coupons", status_code=303)

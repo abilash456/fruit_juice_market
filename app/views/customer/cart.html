@@ -1,1 +1,87 @@
-{% extends "base.html" %}{% block content %}<section class="section narrow"><h1>Your shopping cart</h1>{% for item in items %}<div class="cart-row"><span class="big-emoji">{{item.product.emoji}}</span><div class="grow"><b>{{item.product.name}}</b><p>₹{{"%.2f"|format(item.product.price)}} each</p></div><form action="/cart/update/{{item.product.id}}" method="post"><input type="number" name="quantity" value="{{item.quantity}}" min="1" max="{{item.product.stock}}"><button class="btn small">Update</button></form><b>₹{{"%.2f"|format(item.line_total)}}</b><form action="/cart/remove/{{item.product.id}}" method="post"><button class="link-button danger">Remove</button></form></div>{% else %}<p>Your cart is empty. <a href="/shop">Browse juices</a>.</p>{% endfor %}{% if items %}<div class="total-line"><b>Subtotal</b><strong>₹{{"%.2f"|format(total)}}</strong></div><a class="btn" href="/checkout">Proceed to checkout</a>{% endif %}</section>{% endblock %}
+
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section narrow">
+
+    <h1>Your Shopping Cart</h1>
+
+    {% for item in items %}
+    <div class="cart-row">
+
+        <span class="big-emoji">{{ item.product.emoji }}</span>
+
+        <div class="grow">
+            <b>{{ item.product.name }}</b>
+            <p>₹{{ "%.2f"|format(item.product.price) }} each</p>
+        </div>
+
+        <form action="/cart/update/{{ item.product.id }}" method="post">
+            <input
+                type="number"
+                name="quantity"
+                value="{{ item.quantity }}"
+                min="1"
+                max="{{ item.product.stock }}"
+            >
+            <button class="btn small">Update</button>
+        </form>
+
+        <b>₹{{ "%.2f"|format(item.line_total) }}</b>
+
+        <form action="/cart/remove/{{ item.product.id }}" method="post">
+            <button class="link-button danger">Remove</button>
+        </form>
+
+    </div>
+    {% else %}
+        <p>Your cart is empty. <a href="/shop">Browse juices</a>.</p>
+    {% endfor %}
+
+    {% if items %}
+
+    <div class="coupon-section">
+        <h2>Have a Coupon Code?</h2>
+
+        <form action="/cart/apply-coupon" method="post">
+            <input
+                type="text"
+                name="coupon_code"
+                placeholder="Enter coupon code"
+                required
+            >
+            <button type="submit" class="btn">
+                Apply Coupon
+            </button>
+        </form>
+
+        {% if coupon_message %}
+            <p>{{ coupon_message }}</p>
+        {% endif %}
+    </div>
+
+    <div class="total-line">
+        <b>Subtotal</b>
+        <strong>₹{{ "%.2f"|format(total) }}</strong>
+    </div>
+
+    {% if discount_amount %}
+    <div class="total-line">
+        <b>Coupon Discount</b>
+        <strong>- ₹{{ "%.2f"|format(discount_amount) }}</strong>
+    </div>
+    {% endif %}
+
+    {% if final_total is defined %}
+    <div class="total-line">
+        <b>Final Total</b>
+        <strong>₹{{ "%.2f"|format(final_total) }}</strong>
+    </div>
+    {% endif %}
+
+    <a class="btn" href="/checkout">Proceed to Checkout</a>
+
+    {% endif %}
+
+</section>
+{% endblock %}

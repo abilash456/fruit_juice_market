@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Session, create_engine, select
 from config import DATABASE_URL
-from app.models.models import User, Category, Product
+from app.models.models import User, Category, Product, Coupon
 from app.utils.security import hash_password
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}

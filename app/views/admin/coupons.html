@@ -1,0 +1,128 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+
+    <span class="eyebrow">ADMINISTRATION</span>
+    <h1>Coupon Management</h1>
+    <p>Create and manage promotional discounts.</p>
+
+    <div class="admin-navigation">
+        <a href="/admin" class="btn">Back to Dashboard</a>
+    </div>
+
+    <div class="form-card">
+        <h2>Create New Coupon</h2>
+
+        <form action="/admin/coupons/create" method="post">
+
+            <label>Coupon Code</label>
+            <input
+                type="text"
+                name="code"
+                placeholder="Example: JUICE10"
+                maxlength="50"
+                required
+            >
+
+            <label>Discount Type</label>
+            <select name="discount_type" required>
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount (₹)</option>
+            </select>
+
+            <label>Discount Value</label>
+            <input
+                type="number"
+                name="discount_value"
+                min="0.01"
+                step="0.01"
+                placeholder="10"
+                required
+            >
+
+            <label>Minimum Order Amount (₹)</label>
+            <input
+                type="number"
+                name="minimum_order"
+                min="0"
+                step="0.01"
+                value="0"
+            >
+
+            <label>Maximum Discount (₹)</label>
+            <input
+                type="number"
+                name="max_discount"
+                min="0"
+                step="0.01"
+                value="0"
+            >
+
+            <label>Usage Limit</label>
+            <input
+                type="number"
+                name="usage_limit"
+                min="0"
+                value="0"
+            >
+            <small>Enter 0 for unlimited usage.</small>
+
+            <label>Expiry Date</label>
+            <input
+                type="date"
+                name="expires_at"
+            >
+
+            <button type="submit" class="btn">
+                Create Coupon
+            </button>
+
+        </form>
+    </div>
+
+    <h2>Available Coupons</h2>
+
+    {% for coupon in coupons %}
+    <div class="order-card">
+        <div>
+            <b>{{ coupon.code }}</b>
+
+            <small>
+                {% if coupon.discount_type == "percentage" %}
+                    {{ coupon.discount_value }}% discount
+                {% else %}
+                    ₹{{ coupon.discount_value }} discount
+                {% endif %}
+            </small>
+
+            <small>
+                Minimum order: ₹{{ coupon.minimum_order }}
+            </small>
+
+            <small>
+                Usage: {{ coupon.used_count }}
+                {% if coupon.usage_limit %}
+                    / {{ coupon.usage_limit }}
+                {% else %}
+                    / Unlimited
+                {% endif %}
+            </small>
+
+            <small>
+                Status:
+                {% if coupon.is_active %}
+                    Active
+                {% else %}
+                    Inactive
+                {% endif %}
+            </small>
+        </div>
+    </div>
+    {% else %}
+        <p>No coupons have been created yet.</p>
+    {% endfor %}
+
+</section>
+{% endblock %}

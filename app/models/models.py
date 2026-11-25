@@ -84,3 +84,23 @@ class Review(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+class Coupon(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    code: str = Field(index=True, unique=True)
+    discount_type: str  # "percentage" or "fixed"
+    discount_value: float
+
+    minimum_order: float = 0
+    max_discount: Optional[float] = None
+
+    usage_limit: Optional[int] = None
+    used_count: int = 0
+
+    is_active: bool = True
+    expires_at: Optional[datetime] = None
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
