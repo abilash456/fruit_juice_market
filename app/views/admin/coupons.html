@@ -89,6 +89,17 @@
         <div>
             <b>{{ coupon.code }}</b>
 
+            <form
+    action="/admin/coupons/{{ coupon.id }}/delete"
+    method="post"
+    onsubmit="return confirm('Are you sure you want to delete this coupon?');">
+
+    <button type="submit" class="btn">
+        🗑️ Delete Coupon
+    </button>
+
+</form>
+
             <small>
                 {% if coupon.discount_type == "percentage" %}
                     {{ coupon.discount_value }}% discount

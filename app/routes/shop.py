@@ -161,17 +161,14 @@ def cart_page(request: Request, session: Session = Depends(get_session)):
 
     coupon_message = request.session.pop("coupon_message", None)
 
-    return templates.TemplateResponse(
-        request,
-        "customer/cart.html",
-        {
-            "items": items,
-            "total": round(total, 2),
-            "discount_amount": discount_amount,
-            "final_total": final_total,
-            "coupon_message": coupon_message
-        }
-    )
+    return templates.TemplateResponse(request, "customer/cart.html", {
+        "items": items,
+        "total": round(total, 2),
+        "discount_amount": discount_amount,
+        "final_total": final_total,
+        "coupon_message": coupon_message,
+        "coupon_code": coupon.code if coupon and discount_amount > 0 else None
+    })
 
 @router.post("/cart/update/{product_id}")
 def update_cart(request: Request, product_id: int, quantity: int = Form(...),
@@ -390,5 +387,12 @@ def apply_coupon(
 
     request.session["coupon_code"] = coupon.code
     request.session["coupon_message"] = "Coupon applied successfully!"
+
+    return RedirectResponse("/cart", status_code=303)
+
+@router.post("/cart/remove-coupon")
+def remove_coupon(request: Request):
+    request.session.pop("coupon_code", None)
+    request.session["coupon_message"] = "Coupon removed successfully."
 
     return RedirectResponse("/cart", status_code=303)

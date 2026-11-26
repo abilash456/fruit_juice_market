@@ -55,6 +55,25 @@
             </button>
         </form>
 
+        <form action="/cart/remove-coupon" method="post">
+    <button type="submit" class="btn">
+        Remove Coupon
+    </button>
+</form>
+
+        {% if coupon_code %}
+    <div class="coupon-success">
+        <p>🎉 Applied Coupon: <strong>{{ coupon_code }}</strong></p>
+        <p>You are saving ₹{{ "%.2f"|format(discount_amount) }}</p>
+
+        <form action="/cart/remove-coupon" method="post">
+            <button type="submit" class="btn">
+                Remove Coupon
+            </button>
+        </form>
+    </div>
+{% endif %}
+
         {% if coupon_message %}
             <p>{{ coupon_message }}</p>
         {% endif %}

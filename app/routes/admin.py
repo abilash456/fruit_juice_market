@@ -234,3 +234,17 @@ def create_coupon(
     session.commit()
 
     return RedirectResponse("/admin/coupons", status_code=303)
+
+@router.post("/admin/coupons/{coupon_id}/delete")
+def delete_coupon(
+    coupon_id: int,
+    admin=Depends(require_admin),
+    session: Session = Depends(get_session)
+):
+    coupon = session.get(Coupon, coupon_id)
+
+    if coupon:
+        session.delete(coupon)
+        session.commit()
+
+    return RedirectResponse("/admin/coupons", status_code=303)
